@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs><radialGradient id="orb"><stop stop-color="#fff8d4"/><stop offset=".4" stop-color="#ffcc70"/><stop offset="1" stop-color="#ee6f8b"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <g filter="url(#glow)" stroke-linejoin="round">
+    <path d="M57 61Q17 71 23 29q18 8 35 24M68 55q19-33 40-25-5 37-36 39M38 83Q8 103 24 117q24-5 36-25M75 89q30 18 20 32-22-4-34-23" fill="#e77aa4" fill-opacity=".62" stroke="#ffd2e2" stroke-width="4"/>
+    <path d="M64 34 41 12l4 36M66 34 89 11l-4 39" fill="#fff0cb" stroke="#ce6781" stroke-width="4"/>
+    <path d="M35 63q28-32 58 0l-6 29q-22 25-46 0Z" fill="url(#orb)" stroke="#fff0c4" stroke-width="3"/>
+    <path d="M48 68h7m18 0h7" stroke="#69364e" stroke-width="4" stroke-linecap="round"/><path d="m60 77 4 4 4-4" fill="#8d405d"/>
+    <path d="m48 89 16-5 17 6-17 8Z" fill="#fff6dc" stroke="#e6a2a1" stroke-width="2"/>
+    <path d="M54 105q10 10 20 0" stroke="#fff3d5" stroke-width="3"/>
+  </g>
+</svg>

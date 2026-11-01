@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="176" viewBox="0 0 512 176" fill="none">
+  <defs>
+    <radialGradient id="float-aura"><stop stop-color="#dff8ff" stop-opacity=".58"/><stop offset="1" stop-color="#a2dfff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="chestnut" x1="34" y1="20" x2="88" y2="78"><stop stop-color="#9a644e"/><stop offset=".5" stop-color="#654237"/><stop offset="1" stop-color="#382c3c"/></linearGradient>
+    <linearGradient id="silk" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffefa"/><stop offset="1" stop-color="#cfe9f1"/></linearGradient>
+    <linearGradient id="skirt" x1="45" y1="102" x2="88" y2="158"><stop stop-color="#f9ffff"/><stop offset=".55" stop-color="#dfedf4"/><stop offset="1" stop-color="#b9d2e3"/></linearGradient>
+    <linearGradient id="crystal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f3ffff"/><stop offset=".42" stop-color="#77d6ff"/><stop offset="1" stop-color="#5685e7"/></linearGradient>
+    <g id="chibi-hanamori">
+      <ellipse cx="64" cy="158" rx="45" ry="11" fill="url(#float-aura)"/>
+      <!-- The larger head and compact body make this a chibi silhouette. -->
+      <path d="M39 52Q34 23 51 17q15-13 33 0 17 14 8 42l-8 21H43Z" fill="url(#chestnut)" stroke="#3d3141" stroke-width="2"/>
+      <path d="M43 46q4-21 21-22 21 1 23 23l-4 20q-8 14-20 14-13-2-19-16Z" fill="#ffe1ce" stroke="#bb806e" stroke-width="1.6"/>
+      <path d="M39 49q4-28 24-30 24 1 31 26L82 41q-8-9-17-6-12-7-23 13Z" fill="url(#chestnut)"/>
+      <path d="M45 47q8-12 16-13-2 12-12 18m34-14q-4 11-12 15" fill="#704538"/>
+      <path d="M51 54q5-5 10 0m9 0q5-5 10 0" stroke="#493442" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="57" cy="55" rx="1.3" ry="2" fill="#fff"/><ellipse cx="75" cy="55" rx="1.3" ry="2" fill="#fff"/>
+      <path d="M63 64q3 3 6 0" stroke="#d2777d" stroke-width="1.7" stroke-linecap="round"/>
+      <circle cx="49" cy="62" r="3" fill="#f6a0a0" opacity=".6"/><circle cx="82" cy="62" r="3" fill="#f6a0a0" opacity=".6"/>
+      <path d="M83 29q12-11 19-3-3 13-15 14l-7-5Z" fill="#4b7da7" stroke="#b8efff" stroke-width="1.7"/><path d="m92 31 13 3-10 7" fill="#87d8f4"/>
+      <!-- Short white shrine-maiden coat, broad sleeves and a red/navy sash. -->
+      <path d="M49 77q14-9 29 0l11 22-13 12H51L39 98Z" fill="url(#silk)" stroke="#7795aa" stroke-width="1.5"/>
+      <path d="M51 78 29 82 13 104l15 9 22-14m26-21 21 4 17 22-15 9-22-14" fill="url(#silk)" stroke="#7795aa" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="m20 102 14 7-8 8-14-8Zm89-1-14 7 8 8 14-8Z" fill="#eaf8fb" stroke="#9db8c8" stroke-width="1.4"/>
+      <path d="m50 78 14 15 14-16-4 23H53Z" fill="#365777"/><path d="m58 88 6 7 6-7" stroke="#eafaff" stroke-width="2"/>
+      <path d="M52 99h25l18 49-30 12-32-12Z" fill="url(#skirt)" stroke="#7a98ad" stroke-width="1.6"/>
+      <path d="m42 108 5 35 9 3 6-43m14 0 7 43 9-4 4-34" fill="none" stroke="#d04459" stroke-width="5"/>
+      <path d="M49 105h30l8 10H44Z" fill="#d44758"/><path d="M55 107h17l5 5H51Z" fill="#4e78a2"/>
+      <path d="m50 154 17 2 1 8-19 3-9-5Zm27 2 14-4 8 6-9 8-15-2Z" fill="#38577a" stroke="#d8f1ff" stroke-width="1.6"/>
+      <path d="m51 161 15 1m15-1 11-2" stroke="#a8e8ff" stroke-width="2"/>
+      <path d="M44 78q-8 3-13 10m52-10q8 3 13 10" stroke="#d75266" stroke-width="3"/>
+      <path d="m64 73 5 4-5 5-5-5Z" fill="#f2c56a"/>
+      <path d="m15 86 5-12 5 12-5 12Zm94-7 4-10 5 10-5 10Z" fill="url(#crystal)" stroke="#e2fbff" stroke-width="1.2"/>
+    </g>
+  </defs>
+  <rect width="512" height="176" fill="none"/>
+  <g><use href="#chibi-hanamori"/><path d="m22 43 7-15 7 15-7 14Z" fill="url(#crystal)" stroke="#dcfbff" stroke-width="1.5"/><path d="m96 67 4-9 5 9-5 10Z" fill="url(#crystal)"/></g>
+  <g transform="translate(128 0)"><use href="#chibi-hanamori"/><path d="m10 119-8-7m103 7 10-8M38 160l-9 5m63-5 8 6" stroke="#e8fbff" stroke-width="2.5" stroke-linecap="round"/><path d="m23 51 6-12 6 12-6 12Z" fill="url(#crystal)"/></g>
+  <g transform="translate(256 0)"><use href="#chibi-hanamori"/><path d="M52 53q5-5 10 0m9 0q5-5 10 0" stroke="#553642" stroke-width="3"/><path d="M47 14 42 7m42 8 6-8M36 73l-7 4m61-3 8 5" stroke="#effcff" stroke-width="2.5" stroke-linecap="round"/><path d="M55 66q10 8 20-1" stroke="#d66378" stroke-width="2.5"/><path d="m96 43 6-12 6 12-6 12Z" fill="url(#crystal)"/></g>
+  <g transform="translate(384 0)"><use href="#chibi-hanamori"/><circle cx="64" cy="87" r="75" stroke="#b9efff" stroke-width="2" stroke-dasharray="4 7"/><circle cx="64" cy="87" r="61" stroke="#f2d292" stroke-width="1.5"/><path d="M64 10v20m0 114v20M-11 87h20m110 0h20" stroke="#d8f6ff" stroke-width="2.5"/><path d="m64 39 7 18 18 7-18 7-7 18-7-18-18-7 18-7Z" fill="#89dfff" fill-opacity=".65" stroke="#eaffff" stroke-width="1.3"/></g>
+</svg>

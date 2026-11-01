@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 192 192">
+ <defs><linearGradient id="night" x2="0" y2="1"><stop stop-color="#30213d"/><stop offset="1" stop-color="#111326"/></linearGradient><radialGradient id="moon"><stop stop-color="#fff4d4"/><stop offset="1" stop-color="#ffc7d7" stop-opacity=".1"/></radialGradient></defs>
+ <rect width="192" height="192" rx="42" fill="url(#night)"/><circle cx="142" cy="46" r="42" fill="url(#moon)"/><circle cx="142" cy="46" r="19" fill="#fff0d4"/>
+ <path d="M0 131q44-34 82 0 47-40 110-2v63H0Z" fill="#25233f"/><path d="M17 158V93h11V78h-11v-9l31-26 32 26v9H69v15H57V79H40v14H29v65Z" fill="#d26f8d"/><path d="M8 71h82L49 31Z" fill="#ffe1c4" stroke="#bd5b7c" stroke-width="5"/><path d="M0 159h98" stroke="#f6c4ce" stroke-width="7"/>
+ <path d="M121 125q-23-30-13-53 27 3 34 26 18-19 37-12-3 25-22 37l19 32-35 10-34-13Z" fill="#f1edf1" stroke="#81c9e8" stroke-width="4"/><circle cx="145" cy="92" r="11" fill="#ffe1ce"/><path d="m141 83 3-14 9 12" fill="#775342"/><path d="M117 135h45v9h-45Z" fill="#c54b61"/><path d="m111 62 9-20 9 20-9 21Z" fill="#78d8ff" stroke="#e9ffff" stroke-width="3"/>
+ <g fill="#ffd9e5"><circle cx="25" cy="30" r="3"/><circle cx="105" cy="31" r="2"/><circle cx="102" cy="102" r="2"/></g>
+</svg>

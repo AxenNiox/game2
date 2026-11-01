@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-title" content="桜花守">
+    <meta name="theme-color" content="#211627">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="花守とともに夜桜の結界を守る、和風ファンタジー弾幕シューティング。">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="assets/icons/app-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="assets/icons/app-192.png">
+    <link rel="stylesheet" href="css/style.css">
+    <title>NEBULA CORE — 桜花守</title>
+  </head>
+  <body>
+    <main class="game-shell" id="game-shell">
+      <header class="hud">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>NEBULA <b>CORE</b></span></div>
+        <div class="hud-status">
+          <div class="hud-stage"><span class="hud-label">STAGE</span><strong>01</strong></div>
+          <div class="hud-score"><span class="hud-label">SCORE</span><strong id="score-value">000000</strong></div>
+          <div class="hud-lives"><span class="hud-label">LIFE</span><strong id="lives-value">3</strong></div>
+          <div class="hud-bombs"><span class="hud-label">BOMB</span><strong id="hud-bomb-count">2</strong></div>
+          <button class="pause-button" id="pause-button" type="button" aria-label="ポーズ">Ⅱ</button>
+        </div>
+      </header>
+      <section class="board" aria-label="夜桜神社 弾幕シューティング">
+        <canvas id="game-canvas" aria-label="花守を動かして敵の弾幕を避けるゲーム画面"></canvas>
+        <div class="board-caption"><span class="live-dot"></span> 桜守の社 <span class="caption-divider">/</span> 夜桜結界</div>
+        <div class="boss-hud" id="boss-hud" hidden><div class="boss-hud-label"><span>月狐の神霊</span><span id="boss-phase-label">第一相</span></div><div class="boss-hp-track"><div class="boss-hp-fill" id="boss-hp-fill"></div></div></div>
+        <div class="boss-arrival" id="boss-arrival" hidden>月狐の神霊、降臨</div>
+        <div class="spell-banner" id="spell-banner" hidden><span>妖術顕現</span><strong id="spell-name"></strong></div>
+        <div class="weapon-indicator" id="weapon-indicator" data-weapon="normal" aria-live="polite">通常弾</div>
+        <button class="bomb-button" id="bomb-button" type="button" aria-label="ボムを発動">護符 <b id="bomb-count">2</b></button>
+        <div class="control-hint">DRAG TO MOVE · AUTO FIRE</div>
+
+        <div class="menu-overlay title-overlay" id="title-screen" data-overlay>
+          <section class="menu-panel" data-menu="home">
+            <div class="menu-kicker">夜桜幻想譚 · STAGE 01</div>
+            <h1>NEBULA <span>CORE</span></h1>
+            <p class="menu-subtitle">花守 — 夜桜の結界を守る巫女</p>
+            <div class="record-line">最高得点 <b id="best-score">000000</b><span>最高到達 STAGE <b id="best-stage">01</b></span></div>
+            <label class="menu-field">難易度
+              <select id="difficulty-select" data-difficulty>
+                <option value="easy">EASY · はじめて</option>
+                <option value="normal">NORMAL · 標準</option>
+                <option value="hard">HARD · 上級</option>
+              </select>
+            </label>
+            <button class="menu-primary" id="start-button" type="button">ゲーム開始</button>
+            <div class="menu-button-grid">
+              <button data-open-menu="howto" type="button">遊び方</button>
+              <button data-open-menu="settings" type="button">設定</button>
+              <button data-open-menu="credits" type="button">クレジット</button>
+            </div>
+            <p class="install-hint" id="install-hint">ブラウザーのメニューからホーム画面に追加できます</p>
+            <button class="install-button" id="install-button" type="button" hidden>ホーム画面に追加</button>
+          </section>
+          <section class="menu-panel sub-panel" data-menu="howto" hidden>
+            <div class="menu-kicker">HOW TO PLAY</div><h2>遊び方</h2>
+            <ul class="howto-list">
+              <li><b>移動</b><span>画面をドラッグして花守を動かします。PCでは矢印キー / WASDでも操作できます。</span></li>
+              <li><b>攻撃</b><span>魔法弾は自動で発射されます。敵弾を避けながら狐妖怪を撃破しましょう。</span></li>
+              <li><b>強化</b><span>敵を倒すと、6方向ショットまたはレーザーのアイテムを落とすことがあります。接触して取得しましょう。被弾すると通常弾に戻ります。</span></li>
+              <li><b>護符</b><span>護符ボタンまたはXキーでボム。敵弾を消し、敵とボスにダメージを与えます。</span></li>
+              <li><b>ボス</b><span>ボスのHPが減ると弾幕が変化します。攻撃名を見て安全な隙間へ移動しましょう。</span></li>
+            </ul>
+            <button class="menu-back" data-open-menu="home" type="button">戻る</button>
+          </section>
+          <section class="menu-panel sub-panel" data-menu="settings" hidden>
+            <div class="menu-kicker">GAME SETTINGS</div><h2>設定</h2>
+            <label class="range-field">BGM音量 <output id="bgm-value">35%</output><input id="bgm-volume" type="range" min="0" max="100" step="1"></label>
+            <label class="range-field">効果音音量 <output id="sfx-value">60%</output><input id="sfx-volume" type="range" min="0" max="100" step="1"></label>
+            <label class="range-field">操作感度 <output id="sensitivity-value">100%</output><input id="sensitivity" type="range" min="50" max="150" step="5"></label>
+            <label class="menu-field">難易度
+              <select id="settings-difficulty" data-difficulty><option value="easy">EASY · はじめて</option><option value="normal">NORMAL · 標準</option><option value="hard">HARD · 上級</option></select>
+            </label>
+            <label class="menu-field">画面表示
+              <select id="display-setting"><option value="standard">標準サイズ</option><option value="wide">広めの画面</option></select>
+            </label>
+            <button class="menu-back" data-open-menu="home" type="button">戻る</button>
+          </section>
+          <section class="menu-panel sub-panel" data-menu="credits" hidden>
+            <div class="menu-kicker">CREDITS</div><h2>クレジット</h2>
+            <p class="credit-copy">NEBULA CORE — 桜花守<br>ゲーム企画・プログラム・オリジナルベクター素材<br>制作：NEBULA CORE 開発チーム</p>
+            <p class="credit-note">音楽・効果音はWeb Audioによる生成音です。<br>登場人物・背景・弾幕は本作のオリジナルです。</p>
+            <button class="menu-back" data-open-menu="home" type="button">戻る</button>
+          </section>
+        </div>
+
+        <div class="menu-overlay" id="pause-screen" data-overlay hidden>
+          <section class="menu-panel sub-panel"><div class="menu-kicker">PAUSE</div><h2>ひと休み</h2>
+            <button class="menu-primary" id="resume-button" type="button">再開</button>
+            <div class="menu-button-grid"><button id="pause-settings-button" type="button">設定</button><button id="pause-title-button" type="button">タイトルへ</button></div>
+          </section>
+        </div>
+        <div class="menu-overlay" id="game-over" data-overlay hidden><section class="menu-panel sub-panel result-panel">
+          <div class="menu-kicker">結界が破られた</div><h2>GAME OVER</h2><p>得点 <b id="final-score">000000</b></p><p>残機 <b id="gameover-lives">0</b></p>
+          <button class="menu-primary" id="restart-button" type="button">リトライ</button><button class="menu-back" id="gameover-title-button" type="button">タイトルへ</button>
+        </section></div>
+        <div class="menu-overlay" id="stage-clear" data-overlay hidden><section class="menu-panel sub-panel result-panel clear-panel">
+          <div class="menu-kicker">夜桜の結界、守護完了</div><h2>STAGE CLEAR</h2><p>得点 <b id="clear-score">000000</b></p><p>残機 <b id="clear-lives">3</b></p>
+          <button class="menu-primary" id="clear-retry-button" type="button">もう一度遊ぶ</button><button class="menu-back" id="clear-title-button" type="button">タイトルへ</button>
+        </section></div>
+      </section>
+      <p class="help">ドラッグで移動 · 魔法弾は自動発射 · 護符ボタン / Xキーでボム（2回）</p>
+    </main>
+    <script src="js/storage.js" defer></script>
+    <script src="js/audio.js" defer></script>
+    <script src="js/assets.js" defer></script>
+    <script src="js/main.js" defer></script>
+    <script>if ('serviceWorker' in navigator && location.protocol !== 'file:') window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));</script>
+  </body>
+</html>

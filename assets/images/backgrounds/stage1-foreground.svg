@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="1024" viewBox="0 0 768 1024">
+ <defs><linearGradient id="veil" x2="0" y2="1"><stop stop-color="#1c1832" stop-opacity="0"/><stop offset="1" stop-color="#12192b" stop-opacity=".66"/></linearGradient></defs>
+ <path d="M0 0h768v1024H0Z" fill="url(#veil)"/>
+ <g fill="none" stroke="#352342" stroke-linecap="round"><path d="M-42 160Q96 137 170 238t161 97m-157-98q14-121 107-166m-59 171q75-51 124-39m350 8q-99 21-126 111t-148 105m156-101q-11-118-103-161m53 172q-67-60-121-49" stroke-width="20"/><path d="M-42 160Q96 137 170 238t161 97m330-108q-99 21-126 111t-148 105" stroke="#87506b" stroke-opacity=".6" stroke-width="5"/></g>
+ <g fill="#ffb6d0" opacity=".8"><path d="M62 204q12-18 22 1-5 21-22-1Zm123 81q12-17 22 1-5 20-22-1Zm456-74q12-18 22 1-5 21-22-1Zm-116 104q12-18 22 1-5 21-22-1ZM240 361q10-17 19 1-4 19-19-1Zm329-5q10-17 19 1-4 19-19-1Z"/></g>
+</svg>
