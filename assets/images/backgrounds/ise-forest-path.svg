@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 3072">
+<defs>
+ <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#092b38"/><stop offset=".4" stop-color="#24513e"/><stop offset=".72" stop-color="#55734b"/><stop offset="1" stop-color="#182d2a"/></linearGradient>
+ <linearGradient id="light" x1=".5" y1="0" x2=".5" y2="1"><stop stop-color="#fff8b2" stop-opacity=".72"/><stop offset="1" stop-color="#fff8b2" stop-opacity="0"/></linearGradient>
+ <linearGradient id="stream" x2="0" y2="1"><stop stop-color="#9ce9db" stop-opacity=".2"/><stop offset=".5" stop-color="#53b7b3" stop-opacity=".75"/><stop offset="1" stop-color="#c0f8e7" stop-opacity=".42"/></linearGradient>
+ <linearGradient id="trail" x2="0" y2="1"><stop stop-color="#817d65"/><stop offset="1" stop-color="#423e37"/></linearGradient>
+ <pattern id="moss" width="110" height="90" patternUnits="userSpaceOnUse"><path d="M3 76q20-24 40-4t40-3" fill="none" stroke="#8aaf71" stroke-width="11" opacity=".38"/><circle cx="20" cy="20" r="8" fill="#b8d891" opacity=".35"/></pattern>
+ <g id="cedar"><path d="M0 0h36l-5 3072H5z" fill="#392f2a"/><path d="M18 80Q-145 165-48 250q-112 95-4 177-89 102 5 182-117 114 65 176 159-60 62-176 100-82 6-182 98-84-11-177Q139 125 18 80" fill="#103529" stroke="#477148" stroke-width="10"/><path d="M18 95Q-55 185-23 280M20 138q97 39 97 112M17 380q-62 32-68 102" fill="none" stroke="#91af69" stroke-width="6" opacity=".4"/></g>
+ <g id="lantern"><path d="M-16 0h32l-5 10h-22zM-12 10h24l8 42h-40zM-18 53h36l-6 9h-24zM0 62v68" fill="#303431" stroke="#bc9863" stroke-width="3"/><path d="M-7 19h14v26h-14z" fill="#ffd577" opacity=".9"/></g>
+</defs>
+<rect width="512" height="3072" fill="url(#wood)"/>
+<path d="M46 0 214 0 335 1270 0 1210zM488 0 315 0 213 1270 512 1180z" fill="url(#light)" opacity=".5"/>
+<use href="#cedar" transform="translate(-76 -160) scale(1.12)"/><use href="#cedar" transform="translate(155 -400) scale(.84)"/><use href="#cedar" transform="translate(410 -250) scale(1.1)"/>
+<use href="#cedar" transform="translate(-48 960) scale(1.08)"/><use href="#cedar" transform="translate(438 900) scale(1.1)"/>
+<use href="#cedar" transform="translate(-60 1870) scale(1.1)"/><use href="#cedar" transform="translate(420 1780) scale(1.15)"/>
+<use href="#cedar" transform="translate(-86 2700) scale(1.2)"/><use href="#cedar" transform="translate(430 2600) scale(1.14)"/>
+<path d="M0 650q110 98 208 8t150 21q-37 115 154 104v367q-103-28-185 67t-327-11z" fill="#429a91" opacity=".38"/><path d="M0 720q116 88 202 7t149 25q-39 115 161 105" fill="none" stroke="url(#stream)" stroke-width="56"/>
+<path d="M254 550Q94 3072 256 3072t-2-2522" fill="url(#trail)"/><path d="M254 550Q94 3072 256 3072t-2-2522" fill="url(#moss)" opacity=".9"/>
+<path d="M186 760h145m-163 148h177m-193 160h214m-234 179h254m-276 199h298m-317 222h337m-355 244h375m-395 267h415m-426 278h430" fill="none" stroke="#c0ae86" stroke-opacity=".36" stroke-width="7"/>
+<g opacity=".9"><use href="#lantern" transform="translate(72 760) scale(.8)"/><use href="#lantern" transform="translate(438 930) scale(.85)"/><use href="#lantern" transform="translate(48 1660) scale(1.1)"/><use href="#lantern" transform="translate(462 2020) scale(1.15)"/><use href="#lantern" transform="translate(58 2670) scale(1.3)"/></g>
+<path d="M111 1190q145-108 292 0v38H111zM133 1187v-62h14v62m214 0v-62h14v62" fill="#4b342b" stroke="#c4925e" stroke-width="6"/>
+<path d="M152 2330h208v100H152zM171 2260h170l35 72H136zM201 2205h110l31 50H170zM219 2167l37-40 37 40z" fill="#263730" stroke="#8ca17d" stroke-width="3"/>
+<path d="M0 0h70v3072H0zm442 0h70v3072h-70z" fill="#071d20" opacity=".56"/>
+<g fill="#f6d8a2" opacity=".7"><circle cx="114" cy="478" r="5"/><circle cx="384" cy="634" r="4"/><circle cx="93" cy="1440" r="5"/><circle cx="402" cy="1540" r="6"/><circle cx="111" cy="2360" r="4"/><circle cx="386" cy="2810" r="5"/></g>
+<rect width="512" height="3072" fill="none" stroke="#d7c994" stroke-opacity=".18" stroke-width="24"/>
+</svg>

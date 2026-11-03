@@ -28,7 +28,7 @@
       </header>
       <section class="board" aria-label="夜桜神社 弾幕シューティング">
         <canvas id="game-canvas" aria-label="花守を動かして敵の弾幕を避けるゲーム画面"></canvas>
-        <div class="board-caption"><span class="live-dot"></span> 桜守の社 <span class="caption-divider">/</span> 夜桜結界</div>
+        <div class="board-caption"><span class="live-dot"></span> <span id="stage-scene-label">神社の参道</span></div>
         <div class="boss-hud" id="boss-hud" hidden><div class="boss-hud-label"><span>月狐の神霊</span><span id="boss-phase-label">第一相</span></div><div class="boss-hp-track"><div class="boss-hp-fill" id="boss-hp-fill"></div></div></div>
         <div class="boss-arrival" id="boss-arrival" hidden>月狐の神霊、降臨</div>
         <div class="spell-banner" id="spell-banner" hidden><span>妖術顕現</span><strong id="spell-name"></strong></div>
@@ -63,7 +63,7 @@
             <ul class="howto-list">
               <li><b>移動</b><span>画面をドラッグして花守を動かします。PCでは矢印キー / WASDでも操作できます。</span></li>
               <li><b>攻撃</b><span>魔法弾は自動で発射されます。敵弾を避けながら狐妖怪を撃破しましょう。</span></li>
-              <li><b>強化</b><span>敵を倒すと、6方向ショットまたはレーザーのアイテムを落とすことがあります。接触して取得しましょう。被弾すると通常弾に戻ります。</span></li>
+              <li><b>強化</b><span>敵を倒すと、6方向ショット・レーザー・ダブルのアイテムを落とすことがあります。ダブルは左右に分身を出して本体と同じ攻撃をします。被弾すると強化が解除されます。</span></li>
               <li><b>護符</b><span>護符ボタンまたはXキーでボム。敵弾を消し、敵とボスにダメージを与えます。</span></li>
               <li><b>ボス</b><span>ボスのHPが減ると弾幕が変化します。攻撃名を見て安全な隙間へ移動しましょう。</span></li>
             </ul>

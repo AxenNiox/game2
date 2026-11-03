@@ -135,3 +135,4 @@ button { -webkit-tap-highlight-color: transparent; }
 .weapon-indicator { position: absolute; z-index: 1; right: 12px; bottom: 55px; max-width: 58%; padding: 5px 9px; border: 1px solid #b4dfff77; border-radius: 999px; background: #10172dd9; color: #d9eaff; font: 600 10px sans-serif; letter-spacing: .04em; pointer-events: none; text-shadow: 0 0 9px #8edfff88; }
 .weapon-indicator[data-weapon="sixWay"] { color: #ffe5a3; border-color: #ffd87999; text-shadow: 0 0 10px #ffd87988; }
 .weapon-indicator[data-weapon="laser"] { color: #b7f7ff; border-color: #8ceeffaa; text-shadow: 0 0 10px #8ceeffaa; }
+.weapon-indicator[data-weapon="double"] { color: #ffd2eb; border-color: #ff9edcaa; text-shadow: 0 0 10px #ff9edc99; }

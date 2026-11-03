@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 3072">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#1679d8"/><stop offset=".42" stop-color="#83c7f2"/><stop offset=".72" stop-color="#eef5ff"/><stop offset="1" stop-color="#7eaad0"/></linearGradient>
+ <linearGradient id="cloud" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#c4d8ed"/></linearGradient>
+ <linearGradient id="mount" x2="0" y2="1"><stop stop-color="#758da5"/><stop offset="1" stop-color="#354b68"/></linearGradient>
+ <linearGradient id="path" x2="0" y2="1"><stop stop-color="#b8c4cf"/><stop offset="1" stop-color="#59687d"/></linearGradient>
+ <g id="cloudbank" fill="url(#cloud)"><ellipse cx="0" cy="0" rx="100" ry="52"/><circle cx="-52" cy="-22" r="42"/><circle cx="8" cy="-42" r="58"/><circle cx="58" cy="-20" r="48"/></g>
+ <g id="torii"><path d="M-116 0h232l-16 18h-200zM-94 23h188v17H-94zM-62 40v99h17V40m90 0v99h17V40" fill="#a84e43" stroke="#edb37c" stroke-width="6"/><path d="M-102 18h204" stroke="#f6d4a0" stroke-width="4"/></g>
+ <g id="shrine"><path d="M-120 0h240l-18 20h-204zM-92 25h184v14H-92zM-82 40v100h17V40m130 0v100h17V40" fill="#3b2d34"/><path d="M-98 24 0-25 98 24zM-72-12 0-60 72-12zM-48-48 0-83 48-48z" fill="#a44942" stroke="#e4b16f" stroke-width="6"/><path d="M-7 75h14v65H-7z" fill="#d9b97d"/></g>
+</defs>
+<rect width="512" height="3072" fill="url(#sky)"/>
+<circle cx="408" cy="250" r="110" fill="#fff8dc" opacity=".88"/><circle cx="408" cy="250" r="175" fill="#fff" opacity=".12"/>
+<g opacity=".95"><use href="#cloudbank" transform="translate(90 470) scale(.8)"/><use href="#cloudbank" transform="translate(430 650) scale(1.1)"/><use href="#cloudbank" transform="translate(170 910) scale(1.15)"/></g>
+<path d="m0 1210 100-275 80 166 106-330 103 312 76-160 68 302v440H0z" fill="url(#mount)"/><path d="m157 1100 23-166 32 125m75-288 41 115 67 131m91-91 16 100" fill="none" stroke="#f7fbff" stroke-width="22" opacity=".88"/>
+<g opacity=".92"><use href="#cloudbank" transform="translate(80 1280) scale(1.2)"/><use href="#cloudbank" transform="translate(390 1450) scale(1.25)"/></g>
+<path d="M256 800 18 3072h476z" fill="url(#path)" opacity=".93"/><path d="M256 800 18 3072h476z" fill="none" stroke="#e3eff9" stroke-opacity=".42" stroke-width="5"/>
+<use href="#shrine" transform="translate(256 1490) scale(1.05)"/>
+<path d="M122 1630q134-70 268 0v52H122zM145 1628v-73h12v73m198 0v-73h12v73" fill="#384955" stroke="#b5d4dd" stroke-width="5"/>
+<use href="#torii" transform="translate(256 2030) scale(1.1)"/>
+<path d="M0 1810q90-65 170 2v800H0zm512 20q-90-65-170 2v800h170z" fill="#d9eaff" opacity=".25"/>
+<path d="M70 1990q-14 142 18 240t-15 220 17 260m352-730q-19 160 13 250t-15 210 18 245" fill="none" stroke="#d6f5ff" stroke-width="15" opacity=".75"/>
+<g opacity=".88"><use href="#cloudbank" transform="translate(45 2450) scale(1.2)"/><use href="#cloudbank" transform="translate(470 2610) scale(1.25)"/><use href="#cloudbank" transform="translate(200 2920) scale(1.4)"/></g>
+<g fill="#f2b8d1"><circle cx="78" cy="1340" r="20"/><circle cx="113" cy="1390" r="13"/><circle cx="420" cy="1780" r="17"/><circle cx="392" cy="1830" r="11"/><circle cx="91" cy="2250" r="15"/><circle cx="431" cy="2820" r="18"/></g>
+<rect width="512" height="3072" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="24"/>
+</svg>

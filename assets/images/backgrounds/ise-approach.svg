@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 3072">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#071741"/><stop offset=".28" stop-color="#2457a4"/><stop offset=".58" stop-color="#557dc4"/><stop offset="1" stop-color="#192340"/></linearGradient>
+ <linearGradient id="path" x2="0" y2="1"><stop stop-color="#53637a"/><stop offset="1" stop-color="#242c3c"/></linearGradient>
+ <radialGradient id="moon"><stop stop-color="#fffdf2"/><stop offset=".72" stop-color="#cfe5ff"/><stop offset="1" stop-color="#94baff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="glow" x2="0" y2="1"><stop stop-color="#fff4ca" stop-opacity="0"/><stop offset=".55" stop-color="#fff2cd" stop-opacity=".5"/><stop offset="1" stop-color="#fff2cd" stop-opacity="0"/></linearGradient>
+ <pattern id="stone" width="90" height="64" patternUnits="userSpaceOnUse"><path d="M0 1h89M0 32h90M28 1v31M70 32v32" fill="none" stroke="#a6afbd" stroke-opacity=".24" stroke-width="3"/><path d="M5 6h25m35 33h22" stroke="#edf0ff" stroke-opacity=".08" stroke-width="2"/></pattern>
+ <pattern id="pinkLeaves" width="138" height="180" patternUnits="userSpaceOnUse"><path d="M0 160Q55 110 90 40M70 120Q82 78 130 12" fill="none" stroke="#412249" stroke-width="13"/><g fill="#ffbadb"><circle cx="28" cy="113" r="24"/><circle cx="83" cy="75" r="27"/><circle cx="119" cy="34" r="20"/><circle cx="52" cy="159" r="19"/></g><g fill="#fff0f8"><circle cx="32" cy="108" r="7"/><circle cx="88" cy="71" r="8"/><circle cx="117" cy="30" r="6"/></g></pattern>
+ <g id="torii"><path d="M-130 0h260l-18 19h-224zM-105 25h210v17h-210zM-72 42v104h18V42m108 0v104h18V42" fill="#b74638" stroke="#e7a36e" stroke-width="7"/><path d="M-112 18h224" stroke="#f5d2a1" stroke-width="5"/><path d="M-22 27h44v21h-44z" fill="#3a2030"/></g>
+ <g id="lantern"><path d="M-14 0h28l-4 10h-20zM-11 10h22l8 38h-38zM-17 50h34l-5 8h-24zM0 58v50" fill="#422b36" stroke="#d6a875" stroke-width="3"/><path d="M-7 17h14v24h-14z" fill="#ffc86b" opacity=".9"/></g>
+</defs>
+<rect width="512" height="3072" fill="url(#sky)"/>
+<circle cx="372" cy="360" r="190" fill="url(#moon)"/><circle cx="372" cy="360" r="82" fill="#edf3ff"/><circle cx="346" cy="333" r="19" fill="#cbd8ef" opacity=".55"/><circle cx="405" cy="385" r="13" fill="#cbd8ef" opacity=".5"/>
+<path d="M0 780 98 570l76 116 92-214 92 178 74-126 80 192v390H0z" fill="#27385d"/><path d="m0 870 106-165 86 94 89-167 113 154 59-98 59 124v365H0z" fill="#17294a"/>
+<rect x="0" y="650" width="512" height="690" fill="url(#glow)"/>
+<path d="M0 350q40-65 81 0t82 0 81 0 81 0 81 0 81 0" fill="none" stroke="#ffdfef" stroke-width="4" opacity=".55"/>
+<path d="M-40 195q105-15 200 45M280 560q110-40 255 22M-20 910q100-45 210 10" fill="none" stroke="#432b42" stroke-width="40"/>
+<path d="M0 0h85v3072H0zm427 0h85v3072h-85z" fill="url(#pinkLeaves)" opacity=".94"/>
+<path d="M0 760 80 690v410L0 1260zm512-45-83-65v435l83 70z" fill="#171f38"/>
+<use href="#torii" transform="translate(256 1120) scale(.82)"/>
+<g fill="#161d31"><path d="M119 1540h274v108H119zM145 1467h224l43 74H102zM176 1408h162l37 60H139zM199 1370l58-52 58 52z"/><path d="M158 1648v120h32v-120m133 0v120h32v-120"/></g>
+<path d="M256 1220 15 3072h482z" fill="url(#path)"/><path d="M256 1220 15 3072h482z" fill="url(#stone)" opacity=".8"/>
+<path d="M227 1390h58l18 23h-94zm-40 258h138l14 30H173zm-53 362h244l20 36H113zm-44 433h332l20 36H70z" fill="#c1c9d0" opacity=".34"/>
+<use href="#torii" transform="translate(256 1960) scale(1.12)"/>
+<use href="#lantern" transform="translate(82 2120) scale(1.2)"/><use href="#lantern" transform="translate(430 2120) scale(1.2)"/>
+<use href="#lantern" transform="translate(55 2700) scale(1.5)"/><use href="#lantern" transform="translate(457 2700) scale(1.5)"/>
+<path d="M0 2460q116-68 182 13l-54 599H0zm512 0q-116-68-182 13l54 599h128z" fill="#111a2a" opacity=".85"/>
+<g fill="#ffe3ef" opacity=".9"><path d="M123 560q15-19 24 0-9 17-24 0zm287 410q13-17 22 0-9 16-22 0zm-84 790q16-20 26 0-10 18-26 0zM93 2300q14-18 23 0-9 17-23 0zm328 420q13-17 22 0-9 16-22 0z"/></g>
+<rect width="512" height="3072" fill="none" stroke="#f4d9b4" stroke-opacity=".18" stroke-width="24"/>
+</svg>

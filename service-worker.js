@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nebula-core-shell-v2';
+const CACHE_NAME = 'nebula-core-shell-v4';
 const APP_FILES = [
   './', './index.html', './manifest.json', './css/style.css',
   './js/storage.js', './js/audio.js', './js/assets.js', './js/main.js',
@@ -7,6 +7,8 @@ const APP_FILES = [
   './assets/images/characters/hanamori-sheet.svg',
   './assets/images/enemies/fox-spirit.svg', './assets/images/enemies/moon-kitsune-boss.svg',
   './assets/images/backgrounds/stage1-far.svg', './assets/images/backgrounds/stage1-middle.svg', './assets/images/backgrounds/stage1-foreground.svg',
+  './assets/images/backgrounds/ise-approach.svg', './assets/images/backgrounds/ise-forest-path.svg',
+  './assets/images/backgrounds/ise-sky-shrine.svg', './assets/images/backgrounds/yokai-boss-realm.svg',
   './assets/images/bullets/player-spirit-shot.svg', './assets/images/bullets/enemy-pink-orb.svg',
   './assets/images/bullets/enemy-violet-orb.svg', './assets/images/bullets/enemy-gold-orb.svg',
   './assets/images/effects/sakura-burst.svg', './assets/images/effects/mystic-ring.svg', './assets/images/effects/muzzle-glow.svg',

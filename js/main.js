@@ -8,6 +8,7 @@ const restartButton = document.querySelector('#restart-button');
 const bossHud = document.querySelector('#boss-hud');
 const bossHpFill = document.querySelector('#boss-hp-fill');
 const bossPhaseLabel = document.querySelector('#boss-phase-label');
+const sceneLabelElement = document.querySelector('#stage-scene-label');
 const bossArrival = document.querySelector('#boss-arrival');
 const spellBanner = document.querySelector('#spell-banner');
 const spellNameElement = document.querySelector('#spell-name');
@@ -35,7 +36,8 @@ const SETTINGS = {
   playerBulletSpeed: 560, playerBulletRadius: 4, playerFireInterval: 0.28,
   enemySpawnInterval: 1.15, enemySpeedMin: 95, enemySpeedMax: 155,
   enemyRadius: 15, scorePerEnemy: 100,
-  powerups: { dropChance: 0.24, fallSpeed: 82, radius: 13, multiDamage: 0.8, laserDamage: 3, laserWidth: 11 },
+  scenery: { phaseSeconds: 15, scrollSpeed: 82, crossfadeSeconds: 1.25 },
+  powerups: { dropChance: 0.24, fallSpeed: 82, radius: 13, multiDamage: 0.8, laserDamage: 3, laserWidth: 11, doubleOffset: 44 },
   startingLives: 3, invulnerabilityDuration: 1.6,
   enemyBullet: { speed: 180, hitRadius: 5, drawRadius: 7, color: '#ff65c4', glow: '#ff39c6',
     colors: { pink: '#ff65c4', violet: '#a874ff', gold: '#ffc65f' } },
@@ -55,6 +57,13 @@ const SETTINGS = {
   },
 };
 
+const STAGE_SCENES = [
+  { asset: 'approach', label: '神社の参道' },
+  { asset: 'forestPath', label: '幻想の森' },
+  { asset: 'skyShrine', label: '天空の社' },
+  { asset: 'yokaiRealm', label: '異界の結界' },
+];
+
 const player = { x: 0, y: 0, radius: SETTINGS.playerRadius, hitRadius: SETTINGS.playerHitRadius, movingTimer: 0 };
 const playerBullets = [];
 const enemies = [];
@@ -66,7 +75,9 @@ let score = 0;
 let lives = SETTINGS.startingLives;
 let fireTimer = 0;
 let weaponMode = 'normal';
+let doublePower = false;
 let laserPulse = false;
+let laserPulseXs = [];
 let enemySpawnTimer = 0;
 let previousFrameTime = 0;
 let visualTime = 0;
@@ -77,6 +88,9 @@ let hitFlashTimer = 0;
 let nextEnemyId = 0;
 let stageTime = 0;
 let boss = null;
+let backgroundSceneIndex = 0;
+let previousBackgroundScene = 0;
+let backgroundFade = 1;
 let screenState = 'title';
 let menuOrigin = 'title';
 let bossDefeatTimer = 0;
@@ -105,6 +119,24 @@ function resizeCanvas() {
 }
 
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+
+function updateBackgroundScene(deltaTime) {
+  const phaseLength = SETTINGS.scenery.phaseSeconds;
+  const nextScene = boss ? 3 : Math.min(2, Math.floor(stageTime / phaseLength));
+  if (nextScene !== backgroundSceneIndex) {
+    previousBackgroundScene = backgroundSceneIndex;
+    backgroundSceneIndex = nextScene;
+    backgroundFade = 0;
+    sceneLabelElement.textContent = STAGE_SCENES[nextScene].label;
+  }
+  backgroundFade = Math.min(1, backgroundFade + deltaTime / SETTINGS.scenery.crossfadeSeconds);
+}
+
+function backgroundElapsed(sceneIndex) {
+  if (sceneIndex === 3) return boss ? boss.age : 0;
+  const start = sceneIndex * SETTINGS.scenery.phaseSeconds;
+  return clamp(stageTime - start, 0, SETTINGS.scenery.phaseSeconds);
+}
 
 function difficultyRules() { return DIFFICULTIES[currentSettings.difficulty] || DIFFICULTIES.normal; }
 
@@ -271,29 +303,46 @@ function updatePlayer(deltaTime, width, height) {
   player.y = clamp(player.y, player.radius + 4, height - player.radius - 10);
 }
 
-function updatePlayerFire(deltaTime) {
+function getAttackSources(width) {
+  const sources = [player.x];
+  if (doublePower) {
+    const edge = player.radius + 8;
+    const offset = SETTINGS.powerups.doubleOffset;
+    const offsets = player.x - offset < edge ? [offset, offset * 2]
+      : player.x + offset > width - edge ? [-offset, -offset * 2] : [-offset, offset];
+    for (const sideOffset of offsets) sources.push(clamp(player.x + sideOffset, edge, width - edge));
+  }
+  return sources;
+}
+
+function updatePlayerFire(deltaTime, width) {
   laserPulse = false;
+  laserPulseXs = [];
   fireTimer += deltaTime;
   while (fireTimer >= SETTINGS.playerFireInterval) {
     fireTimer -= SETTINGS.playerFireInterval;
-    if (weaponMode === 'laser') {
-      laserPulse = true;
-      createMuzzle(player.x, player.y - player.radius - 5, '#a4f4ff');
-    } else if (weaponMode === 'sixWay') {
-      const shotCount = 6;
-      const spread = Math.PI / 2.6;
-      for (let i = 0; i < shotCount; i++) {
-        const angle = -spread / 2 + spread * i / (shotCount - 1);
-        playerBullets.push({ x: player.x, y: player.y - player.radius, vx: Math.sin(angle) * SETTINGS.playerBulletSpeed,
-          vy: -Math.cos(angle) * SETTINGS.playerBulletSpeed, damage: SETTINGS.powerups.multiDamage,
-          kind: 'sixWay', drawRadius: SETTINGS.playerBulletRadius + 1, hitRadius: SETTINGS.playerBulletRadius });
+    for (const sourceX of getAttackSources(width)) {
+      if (weaponMode === 'laser') {
+        laserPulse = true;
+        laserPulseXs.push(sourceX);
+        createMuzzle(sourceX, player.y - player.radius - 5, '#a4f4ff');
+      } else if (weaponMode === 'sixWay') {
+        const shotCount = 6;
+        const spread = Math.PI / 2.6;
+        for (let i = 0; i < shotCount; i++) {
+          const angle = -spread / 2 + spread * i / (shotCount - 1);
+          playerBullets.push({ x: sourceX, y: player.y - player.radius, vx: Math.sin(angle) * SETTINGS.playerBulletSpeed,
+            vy: -Math.cos(angle) * SETTINGS.playerBulletSpeed, damage: SETTINGS.powerups.multiDamage,
+            kind: 'sixWay', drawRadius: SETTINGS.playerBulletRadius + 1, hitRadius: SETTINGS.playerBulletRadius });
+        }
+        createMuzzle(sourceX, player.y - player.radius - 5, '#ffe29c');
+      } else {
+        playerBullets.push({ x: sourceX, y: player.y - player.radius, vx: 0, vy: -SETTINGS.playerBulletSpeed, damage: 1,
+          kind: 'normal', drawRadius: SETTINGS.playerBulletRadius, hitRadius: SETTINGS.playerBulletRadius });
+        createMuzzle(sourceX, player.y - player.radius - 5, '#c5f7ff');
       }
-      createMuzzle(player.x, player.y - player.radius - 5, '#ffe29c');
-      sound.playEffect('shot');
-    } else {
-      playerBullets.push({ x: player.x, y: player.y - player.radius, vx: 0, vy: -SETTINGS.playerBulletSpeed, damage: 1,
-        kind: 'normal', drawRadius: SETTINGS.playerBulletRadius, hitRadius: SETTINGS.playerBulletRadius });
-      createMuzzle(player.x, player.y - player.radius - 5, '#c5f7ff');
+    }
+    if (weaponMode !== 'laser') {
       sound.playEffect('shot');
     }
   }
@@ -311,8 +360,17 @@ function updatePlayerBullets(deltaTime, width, height) {
 
 function spawnPowerup(x, y) {
   if (Math.random() >= SETTINGS.powerups.dropChance) return;
-  const kind = Math.random() < 0.5 ? 'sixWay' : 'laser';
+  const roll = Math.random();
+  const kind = roll < 1 / 3 ? 'sixWay' : roll < 2 / 3 ? 'laser' : 'double';
   powerups.push({ kind, x, y, radius: SETTINGS.powerups.radius, speed: SETTINGS.powerups.fallSpeed, age: 0 });
+}
+
+function syncWeaponIndicator() {
+  const indicator = document.querySelector('#weapon-indicator');
+  const labels = { normal: '通常弾', sixWay: '6方向ショット', laser: 'レーザー' };
+  const weaponLabel = labels[weaponMode] || labels.normal;
+  indicator.textContent = `攻撃強化：${weaponLabel}${doublePower ? ' ＋ ダブル' : ''}`;
+  indicator.dataset.weapon = doublePower && weaponMode === 'normal' ? 'double' : weaponMode;
 }
 
 function updatePowerups(deltaTime, height) {
@@ -328,20 +386,19 @@ function updatePowerups(deltaTime, height) {
     const dy = player.y - item.y;
     const hitDistance = player.hitRadius + item.radius;
     if (dx * dx + dy * dy <= hitDistance * hitDistance) {
-      weaponMode = item.kind;
+      if (item.kind === 'double') doublePower = true;
+      else weaponMode = item.kind;
       powerups.splice(i, 1);
-      const label = weaponMode === 'sixWay' ? '6方向ショット' : 'レーザー';
-      const indicator = document.querySelector('#weapon-indicator');
-      indicator.textContent = `攻撃強化：${label}`;
-      indicator.dataset.weapon = weaponMode;
-      createBurst(player.x, player.y, weaponMode === 'sixWay' ? '#ffe29c' : '#9ff4ff', 24);
+      syncWeaponIndicator();
+      const color = item.kind === 'sixWay' ? '#ffe29c' : item.kind === 'double' ? '#ff9edc' : '#9ff4ff';
+      createBurst(player.x, player.y, color, 24);
       sound.playEffect('pickup');
     }
   }
 }
 
 function drawPowerup(item) {
-  const color = item.kind === 'sixWay' ? '#ffd879' : '#8ceeff';
+  const color = item.kind === 'sixWay' ? '#ffd879' : item.kind === 'double' ? '#ff9edc' : '#8ceeff';
   const pulse = 1 + Math.sin(item.age * 6) * 0.12;
   context.save();
   context.translate(item.x, item.y);
@@ -359,25 +416,28 @@ function drawPowerup(item) {
   context.font = 'bold 11px sans-serif';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(item.kind === 'sixWay' ? '6' : 'L', 0, 0);
+  const icon = item.kind === 'sixWay' ? '6' : item.kind === 'double' ? 'D' : 'L';
+  context.fillText(icon, 0, 0);
   context.restore();
 }
 
-function drawLaser() {
+function drawLaser(canvasWidth) {
   if (weaponMode !== 'laser') return;
   const width = SETTINGS.powerups.laserWidth;
-  const beam = context.createLinearGradient(player.x - width, 0, player.x + width, 0);
-  beam.addColorStop(0, 'rgba(80, 203, 255, 0)');
-  beam.addColorStop(0.35, 'rgba(104, 218, 255, 0.4)');
-  beam.addColorStop(0.5, 'rgba(255, 255, 255, 0.96)');
-  beam.addColorStop(0.65, 'rgba(104, 218, 255, 0.4)');
-  beam.addColorStop(1, 'rgba(80, 203, 255, 0)');
   context.save();
   context.globalAlpha = 0.72 + Math.sin(visualTime * 18) * 0.12;
   context.shadowColor = '#83eaff';
   context.shadowBlur = 17;
-  context.fillStyle = beam;
-  context.fillRect(player.x - width, 0, width * 2, player.y - player.radius);
+  for (const sourceX of getAttackSources(canvasWidth)) {
+    const beam = context.createLinearGradient(sourceX - width, 0, sourceX + width, 0);
+    beam.addColorStop(0, 'rgba(80, 203, 255, 0)');
+    beam.addColorStop(0.35, 'rgba(104, 218, 255, 0.4)');
+    beam.addColorStop(0.5, 'rgba(255, 255, 255, 0.96)');
+    beam.addColorStop(0.65, 'rgba(104, 218, 255, 0.4)');
+    beam.addColorStop(1, 'rgba(80, 203, 255, 0)');
+    context.fillStyle = beam;
+    context.fillRect(sourceX - width, 0, width * 2, player.y - player.radius);
+  }
   context.restore();
 }
 
@@ -511,8 +571,12 @@ function resolvePlayerBossCollisions() {
   for (let i = playerBullets.length - 1; i >= 0; i--) {
     if (damageBoss(playerBullets[i], playerBullets[i].damage || 1)) playerBullets.splice(i, 1);
   }
-  if (laserPulse && boss && boss.y < player.y && Math.abs(boss.x - player.x) <= SETTINGS.powerups.laserWidth + boss.radius) {
-    damageBoss({ x: player.x, y: boss.y, hitRadius: SETTINGS.powerups.laserWidth }, SETTINGS.powerups.laserDamage);
+  if (laserPulse && boss && boss.y < player.y) {
+    for (const sourceX of laserPulseXs) {
+      if (Math.abs(boss.x - sourceX) <= SETTINGS.powerups.laserWidth + boss.radius) {
+        damageBoss({ x: sourceX, y: boss.y, hitRadius: SETTINGS.powerups.laserWidth }, SETTINGS.powerups.laserDamage);
+      }
+    }
   }
 }
 
@@ -642,12 +706,12 @@ function updatePlayerCollisions() {
 
 function damagePlayer() {
   lives--;
-  if (weaponMode !== 'normal') {
+  if (weaponMode !== 'normal' || doublePower) {
     weaponMode = 'normal';
+    doublePower = false;
     laserPulse = false;
-    const indicator = document.querySelector('#weapon-indicator');
-    indicator.textContent = '通常弾';
-    indicator.dataset.weapon = 'normal';
+    laserPulseXs = [];
+    syncWeaponIndicator();
   }
   livesElement.textContent = String(lives);
   sound.playEffect('hit');
@@ -681,7 +745,7 @@ function resolvePlayerBulletCollisions() {
   if (laserPulse) {
     for (let enemyIndex = enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
       const enemy = enemies[enemyIndex];
-      if (enemy.y < player.y && Math.abs(enemy.x - player.x) <= SETTINGS.powerups.laserWidth + enemy.radius) {
+      if (enemy.y < player.y && laserPulseXs.some((sourceX) => Math.abs(enemy.x - sourceX) <= SETTINGS.powerups.laserWidth + enemy.radius)) {
         enemies.splice(enemyIndex, 1);
         createBurst(enemy.x, enemy.y, '#b2f4ff', 16);
         sound.playEffect('enemy');
@@ -710,9 +774,11 @@ function resetGame() {
   player.x = bounds.width / 2;
   player.y = bounds.height - 48;
   player.movingTimer = 0;
-  score = 0; lives = SETTINGS.startingLives; fireTimer = 0; laserPulse = false; weaponMode = 'normal'; enemySpawnTimer = 0;
+  score = 0; lives = SETTINGS.startingLives; fireTimer = 0; laserPulse = false; laserPulseXs = []; weaponMode = 'normal'; doublePower = false; enemySpawnTimer = 0;
   nextEnemyPattern = 0; nextEnemyId = 0; invulnerabilityTimer = 0; hitFlashTimer = 0;
   stageTime = 0; boss = null; bossDefeatTimer = 0;
+  backgroundSceneIndex = 0; previousBackgroundScene = 0; backgroundFade = 1;
+  sceneLabelElement.textContent = STAGE_SCENES[0].label;
   bombs = 2; bombSpriteTimer = 0; bombFlashTimer = 0;
   scoreElement.textContent = '000000';
   livesElement.textContent = String(lives);
@@ -738,10 +804,11 @@ function updateGame(deltaTime, width, height) {
   if (boss && boss.state === 'defeated') { updateBoss(deltaTime, width, height); updateEffects(deltaTime); return; }
   updatePlayer(deltaTime, width, height);
   updatePowerups(deltaTime, height);
-  updatePlayerFire(deltaTime);
+  updatePlayerFire(deltaTime, width);
   updatePlayerBullets(deltaTime, width, height);
   updateEnemies(deltaTime, width, height);
   updateBoss(deltaTime, width, height);
+  updateBackgroundScene(deltaTime);
   resolvePlayerBulletCollisions();
   resolvePlayerBossCollisions();
   updateEnemyBullets(deltaTime, width, height);
@@ -803,30 +870,76 @@ function drawAmbientPetals(width, height, time) {
   context.restore();
 }
 
-function drawBackground(width, height, time) {
-  const background = context.createLinearGradient(0, 0, width, height);
-  background.addColorStop(0, '#171c3a'); background.addColorStop(0.52, '#392847'); background.addColorStop(1, '#171728');
-  context.fillStyle = background; context.fillRect(0, 0, width, height);
-  drawParallaxLayer('far', width, height, 4, time);
-  drawNebula(width, height, time);
-  for (let i = 0; i < 72; i++) {
-    const x = ((i * 127.1 + 19) % 997) / 997 * width;
-    const y = ((i * 311.7 + 43) % 991) / 991 * height;
-    context.globalAlpha = 0.3 + 0.55 * (0.5 + 0.5 * Math.sin(time * 0.8 + i * 2));
-    context.beginPath(); context.arc(x, y, i % 12 === 0 ? 1.25 : 0.6, 0, Math.PI * 2);
-    context.fillStyle = i % 5 === 0 ? '#fff1cf' : '#f3e7ff'; context.fill();
+function drawScenicFallback(sceneIndex, width, height) {
+  const palettes = [
+    ['#10214a', '#5f79b2'], ['#102c2b', '#648b56'], ['#1878c4', '#d8efff'], ['#230f45', '#a24b9d'],
+  ];
+  const gradient = context.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, palettes[sceneIndex][0]); gradient.addColorStop(1, palettes[sceneIndex][1]);
+  context.fillStyle = gradient; context.fillRect(0, 0, width, height);
+  if (sceneIndex === 2) {
+    context.fillStyle = '#526989'; context.beginPath(); context.moveTo(0, height * .58); context.lineTo(width * .3, height * .2); context.lineTo(width * .48, height * .5); context.lineTo(width * .72, height * .16); context.lineTo(width, height * .56); context.lineTo(width, height); context.lineTo(0, height); context.fill();
   }
-  context.globalAlpha = 1;
-  drawParallaxLayer('middle', width, height, 16, time);
-  drawParallaxLayer('foreground', width, height, 34, time);
+  if (sceneIndex === 3) {
+    context.fillStyle = '#ffd2e9'; context.shadowColor = '#f596ff'; context.shadowBlur = 30;
+    context.beginPath(); context.arc(width * .52, height * .2, Math.min(width, height) * .16, 0, Math.PI * 2); context.fill(); context.shadowBlur = 0;
+    context.strokeStyle = '#eaa3ff'; context.lineWidth = 2; context.beginPath(); context.ellipse(width / 2, height * .73, width * .42, height * .13, 0, 0, Math.PI * 2); context.stroke();
+  }
+  if (sceneIndex === 0 || sceneIndex === 1 || sceneIndex === 3) {
+    context.fillStyle = sceneIndex === 1 ? '#142b24' : '#182035';
+    context.fillRect(0, 0, width * .12, height); context.fillRect(width * .88, 0, width * .12, height);
+  }
+  context.fillStyle = sceneIndex === 1 ? '#69705d' : sceneIndex === 2 ? '#718297' : '#514454';
+  context.beginPath(); context.moveTo(width * .5, height * .32); context.lineTo(width * .08, height); context.lineTo(width * .92, height); context.closePath(); context.fill();
+  if (sceneIndex !== 2) {
+    context.strokeStyle = sceneIndex === 3 ? '#f093ff' : '#ce9b68'; context.lineWidth = 3;
+    context.beginPath(); context.moveTo(width * .28, height * .43); context.lineTo(width * .72, height * .43); context.moveTo(width * .35, height * .46); context.lineTo(width * .35, height * .56); context.moveTo(width * .65, height * .46); context.lineTo(width * .65, height * .56); context.stroke();
+  }
+}
+
+function drawScenicBackground(sceneIndex, width, height, alpha) {
+  const image = assets.get(STAGE_SCENES[sceneIndex].asset);
+  context.save(); context.globalAlpha = alpha;
+  if (image) {
+    const scale = Math.max(width / 512, height / 3072);
+    const imageWidth = 512 * scale, imageHeight = 3072 * scale;
+    const scroll = Math.min(backgroundElapsed(sceneIndex) * SETTINGS.scenery.scrollSpeed, imageHeight - height);
+    context.drawImage(image, (width - imageWidth) / 2, -scroll, imageWidth, imageHeight);
+  } else {
+    drawScenicFallback(sceneIndex, width, height);
+  }
+  context.restore();
+}
+
+function drawBackground(width, height, time) {
+  context.fillStyle = '#15213a'; context.fillRect(0, 0, width, height);
+  if (backgroundFade < 1 && previousBackgroundScene !== backgroundSceneIndex) {
+    drawScenicBackground(previousBackgroundScene, width, height, 1 - backgroundFade);
+  }
+  drawScenicBackground(backgroundSceneIndex, width, height, backgroundFade);
   drawAmbientPetals(width, height, time);
 }
 
-function drawPlayer() {
+function drawPlayer(width) {
   if (invulnerabilityTimer > 0 && Math.floor(visualTime * 14) % 2 === 0) return;
   const frame = bombSpriteTimer > 0 ? 3 : hitFlashTimer > 0 ? 2 : player.movingTimer > 0 ? 1 : 0;
   const bob = Math.sin(visualTime * 5) * 2;
   const sprite = assets.get('hanamori');
+  if (doublePower) {
+    for (const cloneX of getAttackSources(width).slice(1)) {
+      context.save(); context.globalAlpha = 0.78;
+      if (sprite) {
+        context.shadowColor = '#ffb5e6'; context.shadowBlur = 15;
+        context.drawImage(sprite, frame * 128, 0, 128, 176, cloneX - 22, player.y - 31 + bob, 44, 61);
+      } else {
+        context.translate(cloneX, player.y + bob); context.scale(.72, .72);
+        context.shadowColor = '#ffb5e6'; context.shadowBlur = 13; context.fillStyle = '#c94363';
+        context.beginPath(); context.moveTo(0, -18); context.lineTo(15, 13); context.lineTo(0, 8); context.lineTo(-15, 13); context.closePath(); context.fill();
+        context.fillStyle = '#fff4e6'; context.beginPath(); context.ellipse(0, -7, 7, 8, 0, 0, Math.PI * 2); context.fill();
+      }
+      context.restore();
+    }
+  }
   if (sprite) {
     context.drawImage(sprite, frame * 128, 0, 128, 176, player.x - 30, player.y - 40 + bob, 60, 82);
     return;
@@ -974,14 +1087,14 @@ function drawEffects() {
 
 function drawScene(width, height, time) {
   context.clearRect(0, 0, width, height); drawBackground(width, height, time);
-  drawLaser();
+  drawLaser(width);
   for (const bullet of playerBullets) drawPlayerBullet(bullet);
   for (const item of powerups) drawPowerup(item);
   for (const bullet of enemyBullets) drawEnemyBullet(bullet);
   for (const enemy of enemies) drawEnemy(enemy);
   drawBoss();
   drawEffects();
-  drawPlayer();
+  drawPlayer(width);
   if (boss && boss.state === 'phaseTransition') {
     context.fillStyle = 'rgba(5, 5, 19, 0.58)'; context.fillRect(0, 0, width, height);
     drawMagicCircle();
