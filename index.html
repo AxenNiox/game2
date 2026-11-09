@@ -63,9 +63,9 @@
             <ul class="howto-list">
               <li><b>移動</b><span>画面をドラッグして花守を動かします。PCでは矢印キー / WASDでも操作できます。</span></li>
               <li><b>攻撃</b><span>魔法弾は自動で発射されます。敵弾を避けながら狐妖怪を撃破しましょう。</span></li>
-              <li><b>強化</b><span>敵を倒すと、6方向ショット・レーザー・ダブルのアイテムを落とすことがあります。ダブルは左右に分身を出して本体と同じ攻撃をします。被弾すると強化が解除されます。</span></li>
+              <li><b>強化</b><span>敵を倒すと、6方向ショット（6）・レーザー（L）・分身（D）のアイテムを落とすことがあります。同じアイテムを取るたびに強化され、Dは1個で分身2体、2個で4体、6は2個で10発、Lは2個で太いレーザーになります。被弾すると強化段階がリセットされます。</span></li>
               <li><b>護符</b><span>護符ボタンまたはXキーでボム。敵弾を消し、敵とボスにダメージを与えます。</span></li>
-              <li><b>ボス</b><span>ボスのHPが減ると弾幕が変化します。攻撃名を見て安全な隙間へ移動しましょう。</span></li>
+              <li><b>ボス</b><span>ゲーム開始から50秒後にボスが出現します。倒すたびに全3形態で復活し、弾幕と見た目が強化されます。3回目の撃破でクリアです。</span></li>
             </ul>
             <button class="menu-back" data-open-menu="home" type="button">戻る</button>
           </section>
@@ -114,3 +114,4 @@
     <script>if ('serviceWorker' in navigator && location.protocol !== 'file:') window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));</script>
   </body>
 </html>
+

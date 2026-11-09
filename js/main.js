@@ -37,17 +37,31 @@ const SETTINGS = {
   enemySpawnInterval: 1.15, enemySpeedMin: 95, enemySpeedMax: 155,
   enemyRadius: 15, scorePerEnemy: 100,
   scenery: { phaseSeconds: 15, scrollSpeed: 82, crossfadeSeconds: 1.25 },
-  powerups: { dropChance: 0.24, fallSpeed: 82, radius: 13, multiDamage: 0.8, laserDamage: 3, laserWidth: 11, doubleOffset: 44 },
+  powerups: { dropChance: 0.24, fallSpeed: 82, radius: 13, multiDamage: 0.8, laserDamage: 3, laserWidth: 11, doubleOffset: 44, maxLevel: 3 },
   startingLives: 3, invulnerabilityDuration: 1.6,
   enemyBullet: { speed: 180, hitRadius: 5, drawRadius: 7, color: '#ff65c4', glow: '#ff39c6',
     colors: { pink: '#ff65c4', violet: '#a874ff', gold: '#ffc65f' } },
   boss: {
-    startTime: 45, maxHp: 180, entrySpeed: 135, phaseIntroDuration: 2.4,
+    startTime: 50, maxHp: 180, formCount: 3, formHpMultiplier: [1, 1.15, 1.3],
+    formRadius: [38, 44, 50], entrySpeed: 135, phaseIntroDuration: 2.4, defeatDuration: 1.9,
     scoreBonus: 5000, hitScore: 10, movementSpeed: 0.48,
     phases: [
       { name: '星冠・宵桜', pattern: 'circle', threshold: 1, interval: 2.35, count: 10, speed: 112 },
       { name: '流星結界・花霞', pattern: 'fan', threshold: 0.66, interval: 2.0, count: 5, angle: 58, speed: 128 },
       { name: '月輪螺旋・千重桜', pattern: 'rotating', threshold: 0.33, interval: 1.8, count: 12, speed: 138, rotationSpeed: 0.48, direction: 1 },
+    ],
+    // 形態が上がるたび、同じ相でも弾幕の種類と密度を変えます。
+    upgradedPhases: [
+      [
+        { name: '流星結界・花嵐', pattern: 'fan', threshold: 1, interval: 1.8, count: 8, angle: 86, speed: 145 },
+        { name: '逆巻く月輪', pattern: 'rotating', threshold: 0.66, interval: 1.65, count: 16, speed: 152, rotationSpeed: 0.72, direction: -1 },
+        { name: '狐火・八重連星', pattern: 'circle', threshold: 0.33, interval: 1.55, count: 20, speed: 158 },
+      ],
+      [
+        { name: '終ノ結界・天弓', pattern: 'rotating', threshold: 1, interval: 1.55, count: 18, speed: 168, rotationSpeed: 0.9, direction: 1 },
+        { name: '月狐乱舞・九尾扇', pattern: 'fan', threshold: 0.66, interval: 1.45, count: 9, angle: 112, speed: 180 },
+        { name: '天蓋崩し・星屑', pattern: 'circle', threshold: 0.33, interval: 1.3, count: 24, speed: 188 },
+      ],
     ],
   },
   patterns: {
@@ -75,7 +89,10 @@ let score = 0;
 let lives = SETTINGS.startingLives;
 let fireTimer = 0;
 let weaponMode = 'normal';
-let doublePower = false;
+// アイテムごとに強化段階を記録します。最大3段階です。
+let doubleLevel = 0;
+let sixWayLevel = 0;
+let laserLevel = 0;
 let laserPulse = false;
 let laserPulseXs = [];
 let enemySpawnTimer = 0;
@@ -281,6 +298,7 @@ function triggerBomb() {
   enemies.length = 0;
   if (boss && boss.state !== 'entering' && boss.state !== 'defeated') {
     damageBoss({ x: boss.x, y: boss.y, hitRadius: boss.radius }, 24);
+    if (boss.state === 'defeated') clearBossDefeatClutter();
   }
   scoreElement.textContent = String(score).padStart(6, '0');
 }
@@ -305,14 +323,24 @@ function updatePlayer(deltaTime, width, height) {
 
 function getAttackSources(width) {
   const sources = [player.x];
-  if (doublePower) {
+  const cloneCount = doubleLevel * 2;
+  if (cloneCount > 0) {
     const edge = player.radius + 8;
-    const offset = SETTINGS.powerups.doubleOffset;
-    const offsets = player.x - offset < edge ? [offset, offset * 2]
-      : player.x + offset > width - edge ? [-offset, -offset * 2] : [-offset, offset];
-    for (const sideOffset of offsets) sources.push(clamp(player.x + sideOffset, edge, width - edge));
+    // 分身が多くても画面内に並ぶよう、狭い画面では間隔を縮めます。
+    const spacing = Math.min(SETTINGS.powerups.doubleOffset, (width - edge * 2) / (cloneCount + 1));
+    const spread = spacing * Math.ceil(cloneCount / 2);
+    const direction = player.x < edge + spread ? 1 : player.x > width - edge - spread ? -1 : 0;
+    for (let i = 1; i <= cloneCount; i++) {
+      const alternatingOffset = (i % 2 ? -1 : 1) * Math.ceil(i / 2) * spacing;
+      const offset = direction === 0 ? alternatingOffset : direction * i * spacing;
+      sources.push(clamp(player.x + offset, edge, width - edge));
+    }
   }
   return sources;
+}
+
+function getLaserWidth() {
+  return SETTINGS.powerups.laserWidth * (1 + Math.max(0, laserLevel - 1) * 0.8);
 }
 
 function updatePlayerFire(deltaTime, width) {
@@ -327,7 +355,8 @@ function updatePlayerFire(deltaTime, width) {
         laserPulseXs.push(sourceX);
         createMuzzle(sourceX, player.y - player.radius - 5, '#a4f4ff');
       } else if (weaponMode === 'sixWay') {
-        const shotCount = 6;
+        // 6アイテム1個で6発、2個で10発、3個で14発になります。
+        const shotCount = 6 + (sixWayLevel - 1) * 4;
         const spread = Math.PI / 2.6;
         for (let i = 0; i < shotCount; i++) {
           const angle = -spread / 2 + spread * i / (shotCount - 1);
@@ -369,8 +398,8 @@ function syncWeaponIndicator() {
   const indicator = document.querySelector('#weapon-indicator');
   const labels = { normal: '通常弾', sixWay: '6方向ショット', laser: 'レーザー' };
   const weaponLabel = labels[weaponMode] || labels.normal;
-  indicator.textContent = `攻撃強化：${weaponLabel}${doublePower ? ' ＋ ダブル' : ''}`;
-  indicator.dataset.weapon = doublePower && weaponMode === 'normal' ? 'double' : weaponMode;
+  indicator.textContent = `${weaponLabel}　D:${doubleLevel} 6:${sixWayLevel} L:${laserLevel}`;
+  indicator.dataset.weapon = doubleLevel > 0 && weaponMode === 'normal' ? 'double' : weaponMode;
 }
 
 function updatePowerups(deltaTime, height) {
@@ -386,8 +415,15 @@ function updatePowerups(deltaTime, height) {
     const dy = player.y - item.y;
     const hitDistance = player.hitRadius + item.radius;
     if (dx * dx + dy * dy <= hitDistance * hitDistance) {
-      if (item.kind === 'double') doublePower = true;
-      else weaponMode = item.kind;
+      if (item.kind === 'double') doubleLevel = Math.min(SETTINGS.powerups.maxLevel, doubleLevel + 1);
+      if (item.kind === 'sixWay') {
+        sixWayLevel = Math.min(SETTINGS.powerups.maxLevel, sixWayLevel + 1);
+        weaponMode = item.kind;
+      }
+      if (item.kind === 'laser') {
+        laserLevel = Math.min(SETTINGS.powerups.maxLevel, laserLevel + 1);
+        weaponMode = item.kind;
+      }
       powerups.splice(i, 1);
       syncWeaponIndicator();
       const color = item.kind === 'sixWay' ? '#ffe29c' : item.kind === 'double' ? '#ff9edc' : '#9ff4ff';
@@ -423,7 +459,7 @@ function drawPowerup(item) {
 
 function drawLaser(canvasWidth) {
   if (weaponMode !== 'laser') return;
-  const width = SETTINGS.powerups.laserWidth;
+  const width = getLaserWidth();
   context.save();
   context.globalAlpha = 0.72 + Math.sin(visualTime * 18) * 0.12;
   context.shadowColor = '#83eaff';
@@ -478,19 +514,23 @@ function updateEnemies(deltaTime, width, height) {
   }
 }
 
-function spawnBoss(width, height) {
+function spawnBoss(width, height, form = 1) {
   enemies.length = 0;
   enemyBullets.length = 0;
-  const maxHp = Math.round(SETTINGS.boss.maxHp * difficultyRules().bossHp);
+  const formIndex = form - 1;
+  const maxHp = Math.round(SETTINGS.boss.maxHp * SETTINGS.boss.formHpMultiplier[formIndex] * difficultyRules().bossHp);
   boss = {
-    x: width / 2, y: -58, targetY: Math.max(62, height * 0.17), radius: 38,
-    hp: maxHp, maxHp, phase: 1,
+    x: width / 2, y: -58, targetY: Math.max(62, height * 0.17), radius: SETTINGS.boss.formRadius[formIndex],
+    hp: maxHp, maxHp, form, phase: 1,
     state: 'entering', stateTimer: 0, attackTimer: 0, age: 0, rotation: 0,
   };
+  bossDefeatTimer = 0;
   bossHud.hidden = false;
   bossArrival.hidden = false;
+  const formNames = ['第一', '第二', '第三'];
+  bossArrival.textContent = form === 1 ? '月狐の神霊、降臨' : `月狐の神霊、${formNames[formIndex]}形態へ`;
   createBurst(boss.x, 42, '#ffd9ed', 30);
-  bossPhaseLabel.textContent = '第一相';
+  bossPhaseLabel.textContent = `${formNames[formIndex]}形態`;
   updateBossHpBar();
   sound.setMusic('boss');
 }
@@ -500,25 +540,32 @@ function updateBossHpBar() {
   bossHpFill.style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`;
 }
 
+function getBossSpells(form) {
+  return form === 1 ? SETTINGS.boss.phases : SETTINGS.boss.upgradedPhases[form - 2];
+}
+
 function getBossPhase(hpRatio) {
-  const phases = SETTINGS.boss.phases;
+  const phases = getBossSpells(boss.form);
   if (hpRatio <= phases[2].threshold) return 3;
   if (hpRatio <= phases[1].threshold) return 2;
   return 1;
 }
 
 function beginBossPhase(phaseNumber) {
+  const formNames = ['第一', '第二', '第三'];
+  const phaseNames = ['第一相', '第二相', '第三相'];
+  const spell = getBossSpells(boss.form)[phaseNumber - 1];
   boss.phase = phaseNumber;
   boss.state = 'phaseTransition';
   boss.stateTimer = SETTINGS.boss.phaseIntroDuration;
   boss.attackTimer = 0;
-  bossPhaseLabel.textContent = ['第一相', '第二相', '第三相'][phaseNumber - 1];
-  spellNameElement.textContent = SETTINGS.boss.phases[phaseNumber - 1].name;
+  bossPhaseLabel.textContent = `${formNames[boss.form - 1]}形態・${phaseNames[phaseNumber - 1]}`;
+  spellNameElement.textContent = spell.name;
   spellBanner.hidden = false;
 }
 
 function fireBossPattern(width) {
-  const pattern = SETTINGS.boss.phases[boss.phase - 1];
+  const pattern = getBossSpells(boss.form)[boss.phase - 1];
   const difficulty = difficultyRules();
   const count = Math.max(3, Math.round(pattern.count * difficulty.bossBulletCount));
   const speed = pattern.speed * difficulty.bossBulletSpeed;
@@ -541,7 +588,8 @@ function fireBossPattern(width) {
 }
 
 function damageBoss(bullet, damage = 1) {
-  if (!boss || boss.state === 'entering' || boss.state === 'defeated') return false;
+  // 戦闘開始前とスペル演出中は無敵にして、開始前撃破による進行停止を防ぎます。
+  if (!boss || boss.state !== 'attack') return false;
   const dx = bullet.x - boss.x;
   const dy = bullet.y - boss.y;
   const hitDistance = bullet.hitRadius + boss.radius;
@@ -552,13 +600,12 @@ function damageBoss(bullet, damage = 1) {
   updateBossHpBar();
   if (boss.hp === 0) {
     boss.state = 'defeated';
-    bossDefeatTimer = 1.9;
+    bossDefeatTimer = SETTINGS.boss.defeatDuration;
     enemyBullets.length = 0;
     score += SETTINGS.boss.scoreBonus;
     scoreElement.textContent = String(score).padStart(6, '0');
     spellBanner.hidden = true;
     createBurst(boss.x, boss.y, '#ffe5ad', 64);
-    playerBullets.length = 0;
     sound.playEffect('boss');
   } else {
     const nextPhase = getBossPhase(boss.hp / boss.maxHp);
@@ -569,15 +616,28 @@ function damageBoss(bullet, damage = 1) {
 
 function resolvePlayerBossCollisions() {
   for (let i = playerBullets.length - 1; i >= 0; i--) {
-    if (damageBoss(playerBullets[i], playerBullets[i].damage || 1)) playerBullets.splice(i, 1);
+    const bullet = playerBullets[i];
+    if (damageBoss(bullet, bullet.damage || 1)) {
+      playerBullets.splice(i, 1);
+      // 撃破後は配列の後片付けをループの外で行います。
+      if (boss.state === 'defeated') break;
+    }
   }
   if (laserPulse && boss && boss.y < player.y) {
     for (const sourceX of laserPulseXs) {
-      if (Math.abs(boss.x - sourceX) <= SETTINGS.powerups.laserWidth + boss.radius) {
-        damageBoss({ x: sourceX, y: boss.y, hitRadius: SETTINGS.powerups.laserWidth }, SETTINGS.powerups.laserDamage);
+      if (Math.abs(boss.x - sourceX) <= getLaserWidth() + boss.radius) {
+        damageBoss({ x: sourceX, y: boss.y, hitRadius: getLaserWidth() }, SETTINGS.powerups.laserDamage);
+        if (boss.state === 'defeated') break;
       }
     }
   }
+  // 撃破後に弾やアイテムが停止したまま残らないように片付けます。
+  if (boss && boss.state === 'defeated') clearBossDefeatClutter();
+}
+
+function clearBossDefeatClutter() {
+  playerBullets.length = 0;
+  powerups.length = 0;
 }
 
 function updateBoss(deltaTime, width, height) {
@@ -588,7 +648,15 @@ function updateBoss(deltaTime, width, height) {
   }
   if (boss.state === 'defeated') {
     bossDefeatTimer -= deltaTime;
-    if (bossDefeatTimer <= 0) showStageClear();
+    if (bossDefeatTimer <= 0) {
+      if (boss.form < SETTINGS.boss.formCount) {
+        const nextForm = boss.form + 1;
+        createBurst(boss.x, boss.y, nextForm === 2 ? '#ff83d1' : '#ffd66f', 48);
+        spawnBoss(width, height, nextForm);
+      } else {
+        showStageClear();
+      }
+    }
     return;
   }
   boss.age += deltaTime;
@@ -597,7 +665,8 @@ function updateBoss(deltaTime, width, height) {
     if (boss.y >= boss.targetY) { boss.state = 'waiting'; boss.stateTimer = 0.65; bossArrival.hidden = true; }
     return;
   }
-  boss.x = width / 2 + Math.sin(boss.age * SETTINGS.boss.movementSpeed) * width * 0.2;
+  const formSpeed = SETTINGS.boss.movementSpeed * (1 + (boss.form - 1) * 0.18);
+  boss.x = width / 2 + Math.sin(boss.age * formSpeed) * width * 0.2;
   if (boss.state === 'waiting') {
     boss.stateTimer -= deltaTime;
     if (boss.stateTimer <= 0) beginBossPhase(boss.phase);
@@ -612,7 +681,7 @@ function updateBoss(deltaTime, width, height) {
     return;
   }
   if (boss.state === 'attack') {
-    const pattern = SETTINGS.boss.phases[boss.phase - 1];
+    const pattern = getBossSpells(boss.form)[boss.phase - 1];
     const attackInterval = pattern.interval * difficultyRules().bossAttackInterval;
     boss.attackTimer += deltaTime;
     if (boss.attackTimer >= attackInterval) {
@@ -706,9 +775,11 @@ function updatePlayerCollisions() {
 
 function damagePlayer() {
   lives--;
-  if (weaponMode !== 'normal' || doublePower) {
+  if (weaponMode !== 'normal' || doubleLevel > 0) {
     weaponMode = 'normal';
-    doublePower = false;
+    doubleLevel = 0;
+    sixWayLevel = 0;
+    laserLevel = 0;
     laserPulse = false;
     laserPulseXs = [];
     syncWeaponIndicator();
@@ -745,7 +816,7 @@ function resolvePlayerBulletCollisions() {
   if (laserPulse) {
     for (let enemyIndex = enemies.length - 1; enemyIndex >= 0; enemyIndex--) {
       const enemy = enemies[enemyIndex];
-      if (enemy.y < player.y && laserPulseXs.some((sourceX) => Math.abs(enemy.x - sourceX) <= SETTINGS.powerups.laserWidth + enemy.radius)) {
+      if (enemy.y < player.y && laserPulseXs.some((sourceX) => Math.abs(enemy.x - sourceX) <= getLaserWidth() + enemy.radius)) {
         enemies.splice(enemyIndex, 1);
         createBurst(enemy.x, enemy.y, '#b2f4ff', 16);
         sound.playEffect('enemy');
@@ -774,7 +845,7 @@ function resetGame() {
   player.x = bounds.width / 2;
   player.y = bounds.height - 48;
   player.movingTimer = 0;
-  score = 0; lives = SETTINGS.startingLives; fireTimer = 0; laserPulse = false; laserPulseXs = []; weaponMode = 'normal'; doublePower = false; enemySpawnTimer = 0;
+  score = 0; lives = SETTINGS.startingLives; fireTimer = 0; laserPulse = false; laserPulseXs = []; weaponMode = 'normal'; doubleLevel = 0; sixWayLevel = 0; laserLevel = 0; enemySpawnTimer = 0;
   nextEnemyPattern = 0; nextEnemyId = 0; invulnerabilityTimer = 0; hitFlashTimer = 0;
   stageTime = 0; boss = null; bossDefeatTimer = 0;
   backgroundSceneIndex = 0; previousBackgroundScene = 0; backgroundFade = 1;
@@ -925,7 +996,7 @@ function drawPlayer(width) {
   const frame = bombSpriteTimer > 0 ? 3 : hitFlashTimer > 0 ? 2 : player.movingTimer > 0 ? 1 : 0;
   const bob = Math.sin(visualTime * 5) * 2;
   const sprite = assets.get('hanamori');
-  if (doublePower) {
+  if (doubleLevel > 0) {
     for (const cloneX of getAttackSources(width).slice(1)) {
       context.save(); context.globalAlpha = 0.78;
       if (sprite) {
@@ -1004,7 +1075,9 @@ function drawEnemy(enemy) {
 
 function drawBoss() {
   if (!boss) return;
-  const defeatProgress = boss.state === 'defeated' ? 1 - bossDefeatTimer / 1.9 : 0;
+  const defeatProgress = boss.state === 'defeated'
+    ? clamp(1 - bossDefeatTimer / SETTINGS.boss.defeatDuration, 0, 1)
+    : 0;
   context.save();
   context.translate(boss.x, boss.y);
   if (boss.state === 'defeated') {
@@ -1014,10 +1087,36 @@ function drawBoss() {
     context.beginPath(); context.arc(0, 0, boss.radius + defeatProgress * 95, 0, Math.PI * 2); context.stroke();
   }
   context.rotate(Math.sin(boss.age) * 0.08);
+  // 形態が上がるほど光輪と周回する狐火を増やし、強化を見た目でも示します。
+  const auraColors = ['#d89aff', '#ff72c8', '#ffd66f'];
+  const auraColor = auraColors[boss.form - 1] || auraColors[0];
+  context.save();
+  context.globalAlpha = 0.48 + boss.form * 0.12;
+  context.strokeStyle = auraColor;
+  context.fillStyle = auraColor;
+  context.shadowColor = auraColor;
+  context.shadowBlur = 14 + boss.form * 8;
+  for (let ring = 0; ring < boss.form; ring++) {
+    const radiusX = boss.radius * (1.3 + ring * 0.24);
+    const radiusY = boss.radius * (0.66 + ring * 0.18);
+    context.lineWidth = 1.2 + boss.form * 0.45;
+    context.beginPath();
+    context.ellipse(0, 0, radiusX, radiusY, boss.age * (ring % 2 ? -0.35 : 0.35), 0, Math.PI * 2);
+    context.stroke();
+  }
+  const flameCount = boss.form * 4;
+  for (let i = 0; i < flameCount; i++) {
+    const angle = boss.age * (0.55 + boss.form * 0.12) + i * Math.PI * 2 / flameCount;
+    const orbit = boss.radius * (1.55 + (i % 2) * 0.2);
+    context.beginPath();
+    context.arc(Math.cos(angle) * orbit, Math.sin(angle) * orbit * 0.72, 2 + boss.form, 0, Math.PI * 2);
+    context.fill();
+  }
+  context.restore();
   const portrait = assets.get('boss');
   if (portrait) {
     const size = boss.radius * 3.2;
-    context.shadowColor = '#ffcf91'; context.shadowBlur = 21;
+    context.shadowColor = auraColor; context.shadowBlur = 21 + boss.form * 9;
     context.drawImage(portrait, -size / 2, -size / 2, size, size);
     context.restore();
     return;
@@ -1184,3 +1283,4 @@ setScreenState('title');
 sound.setMusic('title');
 resizeCanvas();
 window.requestAnimationFrame(gameLoop);
+

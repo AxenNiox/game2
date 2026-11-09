@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nebula-core-shell-v4';
+const CACHE_NAME = 'nebula-core-shell-v6';
 const APP_FILES = [
   './', './index.html', './manifest.json', './css/style.css',
   './js/storage.js', './js/audio.js', './js/assets.js', './js/main.js',
@@ -34,3 +34,4 @@ self.addEventListener('fetch', (event) => {
     return response;
   }).catch(() => event.request.mode === 'navigate' ? caches.match('./index.html') : Response.error())));
 });
+
