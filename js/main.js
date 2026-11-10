@@ -1283,4 +1283,3 @@ setScreenState('title');
 sound.setMusic('title');
 resizeCanvas();
 window.requestAnimationFrame(gameLoop);
-
